@@ -1,6 +1,6 @@
 import { createStore } from "redux";
 
-const reducer = (state = { items : [], showCart: false }, action) => {
+const reducer = (state = { items : [], showCart: false, notification: null }, action) => {
 
   const updatedItems = [...state.items];
   switch (action.type) {
@@ -59,6 +59,17 @@ const reducer = (state = { items : [], showCart: false }, action) => {
         ...state,
         showCart: !state.showCart
       }  
+    }
+      
+    case 'notification': {
+      return {
+        ...state,
+        notification: {
+          status: action.payload.status,
+          title: action.payload.title,
+          message: action.payload.message
+        }
+      }
     }
   }
   return state;
