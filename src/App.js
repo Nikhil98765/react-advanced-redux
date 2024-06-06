@@ -5,6 +5,7 @@ import Cart from './components/Cart/Cart';
 import Layout from './components/Layout/Layout';
 import Products from './components/Shop/Products';
 import Notification from './components/UI/Notification';
+import { fetchData, sendCartData } from "./store/cart-actions";
 
 let initial = true;
 
@@ -13,56 +14,24 @@ function App() {
 
   const dispatch = useDispatch();
 
-  const cartItems = useSelector(state => state.items);
-  const showCart = useSelector((state) => state.showCart);
-  const notification = useSelector(state => state.notification);
+  const cartItems = useSelector(state => state.cart.items);
+  const changed = useSelector(state => state.cart.changed);
+  const showCart = useSelector((state) => state.ui.showCart);
+  const notification = useSelector(state => state.ui.notification);
 
   useEffect(() => {
+    dispatch(fetchData());
+  }, [dispatch]);
 
-    async function sendCartData() {
-      dispatch({
-        type: 'notification',
-        payload: {
-          status: 'pending',
-          title: 'Sending...',
-          message: 'Sending Cart data...'
-        }
-      });
-      const response = await fetch("https://react-backend-de03a-default-rtdb.firebaseio.com/cart.json", {
-          method: 'PUT',
-          body: JSON.stringify(cartItems)
-        });
-
-      if (!response.ok) {
-        throw new Error('Error! Something failed.');
-      }
-
-      dispatch({
-        type: "notification",
-        payload: {
-          status: "success",
-          title: "Success!",
-          message: "Sent Cart data successfully!",
-        },
-      });
-    }
-
+  useEffect(() => {
     if (initial) {
       initial = false;
       return;
     }
-
-    sendCartData().catch((error) => {
-      dispatch({
-        type: "notification",
-        payload: {
-          status: "error",
-          title: "Error!",
-          message: "Sending Cart data failed!",
-        },
-      });
-    })
-  }, [cartItems, dispatch])
+    if (changed) {
+      dispatch(sendCartData(cartItems));
+    }
+  }, [cartItems])
 
   return (
     <>
